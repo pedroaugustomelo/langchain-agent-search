@@ -27,7 +27,8 @@ jobs:
       # ✅ Set up Kubernetes (kubectl)
       - name: Set up kubectl
         run: |
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
 
       # ✅ Apply Kubernetes Deployment
       - name: Deploy to Kubernetes
