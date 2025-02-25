@@ -13,12 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ✅ Install OCI CLI (Required for Kubernetes Auth)
+      # ✅ Install OCI CLI
       - name: Install OCI CLI
         run: |
           curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash -s -- --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
 
-          echo "$HOME/bin" >> $GITHUB_PATH  # Add OCI CLI to the system PATH
+      # ✅ Configure OCI CLI
+      - name: Set up OCI CLI Config
+        run: |
+          mkdir -p $HOME/.oci
+          echo "${{ secrets.OCI_CLI_CONFIG }}" | base64 --decode > $HOME/.oci/config
+          chmod 600 $HOME/.oci/config
 
       # ✅ Log in to Oracle Cloud Registry (OCR)
       - name: Log in to Oracle Cloud Registry
@@ -36,7 +42,7 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
 
-      # ✅ Restart Kubernetes Deployment
-      - name: Deploy to Kubernetes
+      # ✅ Deploy to Kubernetes
+      - name: Restart Deployment
         run: |
           kubectl rollout restart deployment langchain-agent-app
