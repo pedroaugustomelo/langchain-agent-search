@@ -9,17 +9,23 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-
       # ✅ Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      # ✅ Install OCI CLI (Required for Kubernetes Auth)
+      - name: Install OCI CLI
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash -s -- --accept-all-defaults
+
+          echo "$HOME/bin" >> $GITHUB_PATH  # Add OCI CLI to the system PATH
 
       # ✅ Log in to Oracle Cloud Registry (OCR)
       - name: Log in to Oracle Cloud Registry
         run: echo "${{ secrets.OCR_AUTH_TOKEN }}" | docker login ocir.sa-saopaulo-1.oci.oraclecloud.com -u "${{ secrets.OCR_USERNAME }}" --password-stdin
 
-      # ✅ Build the Docker image
-      - name: Build Docker Image
+      # ✅ Build and Push Docker Image
+      - name: Build and Push Docker Image
         run: |
           docker buildx create --use
           docker buildx build --platform linux/amd64 -t ocir.sa-saopaulo-1.oci.oraclecloud.com/grm80o6tb9b2/langchain-agent-app:latest --push .
@@ -30,7 +36,7 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
 
-      # ✅ Apply Kubernetes Deployment
+      # ✅ Restart Kubernetes Deployment
       - name: Deploy to Kubernetes
         run: |
           kubectl rollout restart deployment langchain-agent-app
