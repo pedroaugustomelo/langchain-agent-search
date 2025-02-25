@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langchain-agent-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langchain-agent-app
+  template:
+    metadata:
+      labels:
+        app: langchain-agent-app
+    spec:
+      containers:
+        - name: langchain-agent-app
+          image: langchain-agent-app:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
