@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    return jsonify({"response": "Hi, it's working"})
+    return jsonify({"response": "Hi, it's working for now"})
 
 @app.route('/health', methods=['GET'])
 def health():
