@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: langchain-agent-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: langchain-agent-app
@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: langchain-agent-app
-          image: langchain-agent-app:latest
-          imagePullPolicy: Never
+          image: ocir.sa-saopaulo-1.oci.oraclecloud.com/grm80o6tb9b2/langchain-agent-app:latest
           ports:
             - containerPort: 5000
+      imagePullSecrets:
+        - name: ocirsecret
