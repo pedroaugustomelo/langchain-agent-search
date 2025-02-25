@@ -23,7 +23,18 @@ jobs:
       - name: Set up OCI CLI Config
         run: |
           mkdir -p $HOME/.oci
-          echo "${{ secrets.OCI_CLI_CONFIG }}" | base64 --decode > $HOME/.oci/config
+          
+          # Write the API key to file
+          echo "${{ secrets.OCI_API_KEY }}" | base64 --decode > $HOME/.oci/oci_api_key.pem
+          chmod 600 $HOME/.oci/oci_api_key.pem
+          
+          # Create OCI config file
+          echo "[DEFAULT]" > $HOME/.oci/config
+          echo "user=${{ secrets.OCI_USER_OCID }}" >> $HOME/.oci/config
+          echo "fingerprint=${{ secrets.OCI_FINGERPRINT }}" >> $HOME/.oci/config
+          echo "key_file=$HOME/.oci/oci_api_key.pem" >> $HOME/.oci/config
+          echo "tenancy=${{ secrets.OCI_TENANCY_OCID }}" >> $HOME/.oci/config
+          echo "region=${{ secrets.OCI_REGION }}" >> $HOME/.oci/config
           chmod 600 $HOME/.oci/config
 
       # ✅ Log in to Oracle Cloud Registry (OCR)
