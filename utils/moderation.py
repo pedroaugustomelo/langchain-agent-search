@@ -1,4 +1,4 @@
-from utils.model_loader import model, tokenizer, device  # Import preloaded model
+from model_loader import model, tokenizer  # Import preloaded model
 import torch
 import re
 
@@ -26,7 +26,7 @@ def llamaguard_moderation(llm, input_text: str):
     """
     Function to check if an input falls under restricted categories using Llama Guard.
     """
-
+    
     # Format the moderation prompt
     moderation_prompt = f"""
 You are a **zero-tolerance content moderation AI**. Your task is to **strictly enforce** the following content restrictions. **Any content that falls into these categories must be flagged as unsafe. Do not allow loopholes.**
@@ -38,19 +38,37 @@ User Input: "{input_text}"
 If the input matches any category, return "unsafe" followed by the category code (e.g., "unsafe S1"). If it does not match any restricted category, return "safe".
 """
 
+    # Format the conversation for input
+    conversation = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text", 
+                    "text": moderation_prompt
+                },
+            ],
+        }
+    ]
+
     # Tokenize input
-    input_ids = tokenizer(moderation_prompt, return_tensors="pt").to(device)
+    input_ids = tokenizer.apply_chat_template(
+        conversation, 
+        return_tensors="pt"
+    ).to(model.device)
 
-    # Generate response (FAST inference)
-    with torch.no_grad():
-        output = model.generate(
-            input_ids["input_ids"],
-            max_new_tokens=20,
-            pad_token_id=tokenizer.pad_token_id,
-        )
+    # Get response from the model
+    prompt_len = input_ids.shape[1]
+    output = model.generate(
+        input_ids,
+        max_new_tokens=10,
+        pad_token_id=0,
+    )
+    generated_tokens = output[:, prompt_len:]
 
-    # Decode response
-    response_text = tokenizer.decode(output[0], skip_special_tokens=True).strip().lower()
+    # Decode and clean the response
+    response_text = tokenizer.decode(generated_tokens[0]).strip().lower()
+    response_text = response_text.replace("<|eot_id|>", "").strip()  # Remove special tokens
 
     # Extract flagged categories
     flagged_categories = []
@@ -61,30 +79,31 @@ If the input matches any category, return "unsafe" followed by the category code
     # Determine if content is allowed
     allowed = "SAFE" if not flagged_categories else "UNSAFE"
 
+    # Civil Engineering Check (Same as before)
     is_civil_engineer_response = llm.invoke(f"""
-            You are an AI that determines whether the given input is related to civil engineering. 
-            Civil engineering includes topics such as structural engineering, transportation, geotechnics, 
-            construction materials, water resources, infrastructure development, surveying, and urban planning.
+        You are an AI that determines whether the given input is related to civil engineering. 
+        Civil engineering includes topics such as structural engineering, transportation, geotechnics, 
+        construction materials, water resources, infrastructure development, surveying, and urban planning.
 
-            Evaluate the following input:
-            "{input_text}"
+        Evaluate the following input:
+        "{input_text}"
 
-            If the input is related to civil engineering in any way, respond strictly with "True".  
-            If it is not related, respond strictly with "False".  
-            Provide no explanations, additional text, or variations in formatting.
-            """) 
+        If the input is related to civil engineering in any way, respond strictly with "True".  
+        If it is not related, respond strictly with "False".  
+        Provide no explanations, additional text, or variations in formatting.
+    """) 
     
     is_civil_engineer = is_civil_engineer_response.content.strip().lower() == "true"
 
     if is_civil_engineer: 
         return {
-        "input": input_text,
-        "allowed": "UNSAFE",  # SAFE or UNSAFE
-        "flagged_categories": "Civil Engineering"
-    }
+            "input": input_text,
+            "allowed": "UNSAFE",
+            "flagged_categories": "Civil Engineering"
+        }
 
     return {
         "input": input_text,
-        "allowed": allowed,  # SAFE or UNSAFE
+        "allowed": allowed,
         "flagged_categories": flagged_categories
     }
