@@ -3,7 +3,7 @@ import logging
 from flask import Flask, request, jsonify
 from agents.graph import run_graph
 from dotenv import load_dotenv
-from utils.model_loader import model, tokenizer, model_loaded  # Import model and loading status
+from utils.model_loader import model, tokenizer  # Import model and tokenizer from model_loader
 
 app = Flask(__name__)
 
@@ -12,9 +12,6 @@ logging.basicConfig(level=logging.INFO)
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    if not model_loaded:
-        return jsonify({"error": "Model is still loading. Try again later."}), 503
-
     try:
         if not request.is_json:
             return jsonify({"error": "Invalid request format. Expected JSON."}), 400
@@ -33,8 +30,6 @@ def chat():
 
 @app.route('/health', methods=['GET'])
 def health():
-    if not model_loaded:
-        return jsonify({"status": "loading"}), 503
     return jsonify({"status": "healthy"})
 
 if __name__ == '__main__':

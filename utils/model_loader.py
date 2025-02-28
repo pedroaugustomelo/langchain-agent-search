@@ -2,7 +2,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import os
-import threading
 
 # Load Hugging Face token from environment variable
 hf_token = os.getenv("HF_TOKEN")
@@ -16,10 +15,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # Initialize global variables for model and tokenizer
 model = None
 tokenizer = None
-model_loaded = False
 
 def load_model():
-    global model, tokenizer, model_loaded
+    global model, tokenizer
     try:
         print("🔥 Loading Llama Guard model...")
         model = AutoModelForCausalLM.from_pretrained(
@@ -29,17 +27,12 @@ def load_model():
         ).to(device)
 
         tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
-        model_loaded = True
         print("✅ Model loaded successfully!")
     except Exception as e:
         print(f"❌ Error loading model: {e}")
+        raise Exception("Model loading failed")
 
-# Start the model loading process in the background thread
-def start_model_loading():
-    thread = threading.Thread(target=load_model, daemon=True)
-    thread.start()
+# Load model synchronously before Flask app starts
+load_model()
 
-# Call this function when the app starts to begin loading the model asynchronously
-start_model_loading()
-
-__all__ = ["model", "tokenizer", "device", "model_loaded"]
+__all__ = ["model", "tokenizer", "device"]
