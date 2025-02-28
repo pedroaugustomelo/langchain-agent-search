@@ -1,8 +1,6 @@
-from model_loader import model, tokenizer  # Import preloaded model
-import torch
+from utils.model_loader import model, tokenizer  
 import re
 
-# Define moderation categories
 categories = {
     "S1": "Violent Crimes",
     "S2": "Non-Violent Crimes",
@@ -27,7 +25,7 @@ def llamaguard_moderation(llm, input_text: str):
     Function to check if an input falls under restricted categories using Llama Guard.
     """
     
-    # Format the moderation prompt
+    
     moderation_prompt = f"""
 You are a **zero-tolerance content moderation AI**. Your task is to **strictly enforce** the following content restrictions. **Any content that falls into these categories must be flagged as unsafe. Do not allow loopholes.**
 

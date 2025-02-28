@@ -3,7 +3,7 @@ import logging
 from flask import Flask, request, jsonify
 from agents.graph import run_graph
 from dotenv import load_dotenv
-from utils.model_loader import model, tokenizer  # ✅ Import preloaded model
+from utils.model_loader import model, tokenizer 
 
 app = Flask(__name__)
 
