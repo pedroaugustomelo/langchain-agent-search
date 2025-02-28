@@ -15,17 +15,9 @@ This repository contains a reference implementation for the proposed challenge u
 - [Features](#features)
 - [Architecture Overview](#architecture-overview)
 - [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Configuration](#configuration)
-- [Usage](#usage)
 - [Deployment](#deployment)
-  - [Docker](#docker)
-  - [Kubernetes](#kubernetes)
+  - [Current Deployment](#current-deployment)
   - [AWS Deployment Example](#aws-deployment-example)
-- [Additional Integrations](#additional-integrations)
-- [Contributing](#contributing)
 - [License](#license)
 
   ## Features
@@ -90,17 +82,5 @@ This repository contains a reference implementation for the proposed challenge u
 ## License
 
 This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute this software, subject to the terms detailed in the license.
-
----
-
-## References
-
-- [LangChain Documentation](https://github.com/hwchase17/langchain)
-- [LangGraph Documentation](https://github.com/langgraph)
-- [Flask Documentation](https://flask.palletsprojects.com/)
-- [Docker Documentation](https://docs.docker.com/)
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-- [AWS Documentation](https://aws.amazon.com/documentation/)
-- [LlamaGuard](https://github.com/ShreyaR/llamaguard)
 
 
