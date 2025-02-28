@@ -64,18 +64,18 @@ This repository contains a reference implementation for the proposed challenge u
 
 - **Conversational Agent**: Main interface for users’ questions. Decides whether to call the Search Agent.  
 - **Search Agent**: Provides up to 10 search results from external or internal data sources. Returns these results to the Conversational Agent only when called.  
-- **Flask API**: Exposes an endpoint (e.g., `/ask`) to receive user queries and routes them to the Conversational Agent.  
+- **Flask API**: Exposes an endpoint (e.g., `/chat`) to receive user queries and routes them to the Conversational Agent.  
 - **Kubernetes**: Orchestrates container deployments, ensuring scalability and reliability.  
 - **LlamaGuard**: Ensures content moderation before generating final responses.
 
 ## Technologies Used
 
-- **Python 3.x**
+- **Python 3.9**
 - **Flask** for building the REST API
 - **LangChain** and **LangGraph** for building advanced AI workflows
 - **Docker** for containerizing the application
 - **Kubernetes** for container orchestration
-- **AWS** (Optional) for deploying the containerized solution in a managed environment
+- **AWS** for model inference
 - **LlamaGuard** (or similar) for content moderation
 - **Other Tools**: Tools or APIs for external data searches
 
