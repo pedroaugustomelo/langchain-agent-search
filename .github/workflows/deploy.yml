@@ -9,17 +9,40 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-
       # ✅ Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      # ✅ Install OCI CLI
+      - name: Install OCI CLI
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash -s -- --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      # ✅ Configure OCI CLI
+      - name: Set up OCI CLI Config
+        run: |
+          mkdir -p $HOME/.oci
+          
+          # Write the API key to file
+          echo "${{ secrets.OCI_API_KEY }}" | base64 --decode > $HOME/.oci/oci_api_key.pem
+          chmod 600 $HOME/.oci/oci_api_key.pem
+          
+          # Create OCI config file
+          echo "[DEFAULT]" > $HOME/.oci/config
+          echo "user=${{ secrets.OCI_USER_OCID }}" >> $HOME/.oci/config
+          echo "fingerprint=${{ secrets.OCI_FINGERPRINT }}" >> $HOME/.oci/config
+          echo "key_file=$HOME/.oci/oci_api_key.pem" >> $HOME/.oci/config
+          echo "tenancy=${{ secrets.OCI_TENANCY_OCID }}" >> $HOME/.oci/config
+          echo "region=${{ secrets.OCI_REGION }}" >> $HOME/.oci/config
+          chmod 600 $HOME/.oci/config
 
       # ✅ Log in to Oracle Cloud Registry (OCR)
       - name: Log in to Oracle Cloud Registry
         run: echo "${{ secrets.OCR_AUTH_TOKEN }}" | docker login ocir.sa-saopaulo-1.oci.oraclecloud.com -u "${{ secrets.OCR_USERNAME }}" --password-stdin
 
-      # ✅ Build the Docker image
-      - name: Build Docker Image
+      # ✅ Build and Push Docker Image
+      - name: Build and Push Docker Image
         run: |
           docker buildx create --use
           docker buildx build --platform linux/amd64 -t ocir.sa-saopaulo-1.oci.oraclecloud.com/grm80o6tb9b2/langchain-agent-app:latest --push .
@@ -27,9 +50,10 @@ jobs:
       # ✅ Set up Kubernetes (kubectl)
       - name: Set up kubectl
         run: |
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
 
-      # ✅ Apply Kubernetes Deployment
-      - name: Deploy to Kubernetes
+      # ✅ Deploy to Kubernetes
+      - name: Restart Deployment
         run: |
           kubectl rollout restart deployment langchain-agent-app
