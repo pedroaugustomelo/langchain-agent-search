@@ -17,5 +17,8 @@ spec:
           image: ocir.sa-saopaulo-1.oci.oraclecloud.com/grm80o6tb9b2/langchain-agent-app:latest
           ports:
             - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: langchain-agent-app-secrets
       imagePullSecrets:
         - name: ocirsecret
