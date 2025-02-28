@@ -3,9 +3,32 @@ import logging
 from flask import Flask, request, jsonify
 from agents.graph import run_graph
 from dotenv import load_dotenv
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+import os
+import re
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Load Hugging Face token from environment variable
+hf_token = os.getenv("HF_TOKEN")
+
+# Model ID for Llama-Guard-3-1B
+model_id = "meta-llama/Llama-Guard-3-1B"
+
+# Set device (Prefer GPU if available)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Load model ONCE (kept in memory)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,  # Use lower precision for GPU
+    device_map="cuda" if device == "cuda" else "cpu",
+).to(device)
+
+# Load tokenizer ONCE (kept in memory)
+tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
 
 app = Flask(__name__)
 

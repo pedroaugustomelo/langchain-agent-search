@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: langchain-agent-app
 spec:
-  replicas: 2
+  replicas: 1  # Reduced to 1 since the cluster has limited resources
   selector:
     matchLabels:
       app: langchain-agent-app
@@ -20,5 +20,29 @@ spec:
           envFrom:
             - secretRef:
                 name: langchain-agent-app-secrets
+          resources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+              ephemeral-storage: "2Gi"  # Prevents eviction due to disk pressure
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+              ephemeral-storage: "4Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30  # Increased to prevent premature failures
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30  # Increased to prevent premature failures
+            periodSeconds: 5
+            timeoutSeconds: 5
       imagePullSecrets:
         - name: ocirsecret
+      restartPolicy: Always
