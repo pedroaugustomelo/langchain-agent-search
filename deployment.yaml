@@ -22,13 +22,13 @@ spec:
                 name: langchain-agent-app-secrets
           resources:
             requests:
-              cpu: "4"  # Ensures the pod gets at least 4 CPUs
-              memory: "16Gi"  # Ensures the pod gets at least 16GB RAM
-              ephemeral-storage: "4Gi"  # Prevents eviction due to disk pressure
+              cpu: "2"  
+              memory: "4Gi"
+              ephemeral-storage: "2Gi"
             limits:
-              cpu: "4"  # Maximum allowed CPU usage
-              memory: "16Gi"  # Maximum allowed memory usage
-              ephemeral-storage: "8Gi"
+              cpu: "4"
+              memory: "8Gi"
+              ephemeral-storage: "4Gi"
           livenessProbe:
             httpGet:
               path: /health
