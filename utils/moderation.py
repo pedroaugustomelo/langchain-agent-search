@@ -22,7 +22,7 @@ categories = {
 category_prompt = "\n".join([f"{code}: {desc}" for code, desc in categories.items()])
 
 
-def llamaguard_moderation(input_text: str):
+def llamaguard_moderation(llm, input_text: str):
     """
     Function to check if an input falls under restricted categories using Llama Guard.
     """
@@ -61,8 +61,30 @@ If the input matches any category, return "unsafe" followed by the category code
     # Determine if content is allowed
     allowed = "SAFE" if not flagged_categories else "UNSAFE"
 
+    is_civil_engineer_response = llm.invoke(f"""
+            You are an AI that determines whether the given input is related to civil engineering. 
+            Civil engineering includes topics such as structural engineering, transportation, geotechnics, 
+            construction materials, water resources, infrastructure development, surveying, and urban planning.
+
+            Evaluate the following input:
+            "{input_text}"
+
+            If the input is related to civil engineering in any way, respond strictly with "True".  
+            If it is not related, respond strictly with "False".  
+            Provide no explanations, additional text, or variations in formatting.
+            """) 
+    
+    is_civil_engineer = is_civil_engineer_response.content.strip().lower() == "true"
+
+    if is_civil_engineer: 
+        return {
+        "input": input_text,
+        "allowed": "UNSAFE",  # SAFE or UNSAFE
+        "flagged_categories": "Civil Engineering"
+    }
+
     return {
         "input": input_text,
-        "allowed": allowed,
+        "allowed": allowed,  # SAFE or UNSAFE
         "flagged_categories": flagged_categories
     }
