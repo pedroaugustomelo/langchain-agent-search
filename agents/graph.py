@@ -73,4 +73,5 @@ def run_graph(user_input: str):
     
     # Retrieve and return the final response
     state = dict(final_output)
-    return state.messages[-1]["content"]
+    
+    return state["messages"][-1]["content"]
