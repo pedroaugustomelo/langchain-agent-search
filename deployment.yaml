@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: langchain-agent-app
 spec:
-  replicas: 1  # Reduced to 1 since the cluster has limited resources
+  replicas: 1
   selector:
     matchLabels:
       app: langchain-agent-app
@@ -22,25 +22,25 @@ spec:
                 name: langchain-agent-app-secrets
           resources:
             requests:
-              cpu: "2"
-              memory: "4Gi"
-              ephemeral-storage: "2Gi"  # Prevents eviction due to disk pressure
+              cpu: "4"  # Ensures the pod gets at least 4 CPUs
+              memory: "16Gi"  # Ensures the pod gets at least 16GB RAM
+              ephemeral-storage: "4Gi"  # Prevents eviction due to disk pressure
             limits:
-              cpu: "4"
-              memory: "8Gi"
-              ephemeral-storage: "4Gi"
+              cpu: "4"  # Maximum allowed CPU usage
+              memory: "16Gi"  # Maximum allowed memory usage
+              ephemeral-storage: "8Gi"
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 30  # Increased to prevent premature failures
+            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 30  # Increased to prevent premature failures
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 5
       imagePullSecrets:
